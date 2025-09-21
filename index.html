@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trim-n-Sizer - Video Trimming & Compression Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .drop-zone {
+            border: 3px dashed #444;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #252525;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4a9eff;
+            background: #2a3444;
+        }
+
+        .drop-zone.has-video {
+            padding: 0;
+            border: none;
+            background: transparent;
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .drop-text {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .drop-subtext {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .video-container {
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .controls-section {
+            margin-top: 30px;
+        }
+
+        .size-controls {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .size-label {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .size-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .size-input {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            padding: 12px 16px;
+            width: 120px;
+            transition: border-color 0.3s;
+        }
+
+        .size-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .size-presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #404040;
+            border-color: #666;
+        }
+
+        .preset-btn:active {
+            transform: translateY(1px);
+        }
+
+        .timeline-container {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .timeline-label {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 15px;
+        }
+
+        .timeline {
+            position: relative;
+            height: 60px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .timeline-track {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            right: 10px;
+            height: 4px;
+            background: #444;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .timeline-selection {
+            position: absolute;
+            height: 4px;
+            background: #4a9eff;
+            border-radius: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .timeline-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #4a9eff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: grab;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+        }
+
+        .timeline-handle:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .timeline-handle:active {
+            cursor: grabbing;
+        }
+
+        .timeline-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .render-section {
+            text-align: center;
+        }
+
+        .render-btn {
+            background: linear-gradient(135deg, #4a9eff, #0066cc);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 15px 40px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
+        }
+
+        .render-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+        }
+
+        .render-btn:active {
+            transform: translateY(0);
+        }
+
+        .render-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            display: none;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9eff, #0066cc);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .drop-zone {
+                padding: 40px 15px;
+            }
+
+            .size-input-group {
+                justify-content: center;
+            }
+
+            .size-presets {
+                justify-content: center;
+            }
+
+            .render-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Trim-n-Sizer</h1>
+        <p>Trim videos and compress them to your target file size - all processed locally in your browser</p>
+    </div>
+
+    <div class="main-container">
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">📁</div>
+            <div class="drop-text">Drop your video file here</div>
+            <div class="drop-subtext">click to browse, or paste a video</div>
+            <input type="file" id="fileInput" accept="video/*" style="display: none;">
+        </div>
+
+        <div class="video-container" id="videoContainer">
+            <video id="videoPlayer" controls></video>
+        </div>
+
+        <div class="controls-section">
+            <div class="size-controls">
+                <label class="size-label">Target File Size:</label>
+                <div class="size-input-group">
+                    <input type="number" class="size-input" id="sizeInput" value="10" min="1" max="1000" step="0.1">
+                    <span style="color: #ccc;">MB</span>
+                    <div class="size-presets">
+                        <button class="preset-btn" data-size="5">5 MB</button>
+                        <button class="preset-btn" data-size="10">10 MB</button>
+                        <button class="preset-btn" data-size="25">25 MB</button>
+                        <button class="preset-btn" data-size="50">50 MB</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-label">Trim Video:</div>
+                <div class="timeline" id="timeline">
+                    <div class="timeline-track"></div>
+                    <div class="timeline-selection" id="timelineSelection"></div>
+                    <div class="timeline-handle" id="startHandle" style="left: 10px;"></div>
+                    <div class="timeline-handle" id="endHandle" style="right: 10px;"></div>
+                </div>
+                <div class="timeline-times">
+                    <span id="startTime">00:00</span>
+                    <span id="endTime">00:00</span>
+                </div>
+            </div>
+
+            <div class="render-section">
+                <button class="render-btn" id="renderBtn" disabled>Process Video</button>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

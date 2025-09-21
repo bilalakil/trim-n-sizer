@@ -1,0 +1,26 @@
+You are an expert web developer. 
+
+# Basic Site Description:
+- A light weight handy tool for quickly editing videos for sharing.
+- Drag and drop a video file from your PC to the browser.
+- The video is playable in browser, and includes a timeline with trim controls to set a new start and end timing.
+- Somewhere, there's an input field for maximum file size, with an initial value of 10mb. New values can be typed into it, or otherwise some preset buttons can be used to set it to common values: 5mb, 10mb, 25mb, 50mb.
+- There's a Render button which, when pressed, causes the site to apply the trim and whatever combination of compression / reduced FPS / reduced resolution is required to achieve the file size limit specified, and download the resulting file.
+
+# SECURITY IMPERATIVE
+- Work on only files within our project folder.
+- Never read, write, or do anything outside of our project folder
+
+# Additional & Technical Details
+- All functionality occurs locally on the user's PC - there's no server upload or anything. This should all work without any internet connection, provided the website has been loaded already.
+- Adaptive design to ensure mobile-friendly
+- Low tech solution: avoid heavy frameworks where possible
+
+# Visual Details
+- Dark mode.
+- Modern design, visually comfortable and consistent
+
+# Basic Site Structure
+- Single page minimal site.
+- Big drag n drop indicator in the middle that's replaced with the video when dragged in.
+- Timeline is beneath the video with draggable start and end handles. Dragging the handle pauses and scrubs the video so they can see the frame at the handle's position.
