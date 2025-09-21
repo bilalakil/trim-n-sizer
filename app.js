@@ -1,5 +1,5 @@
-import { FFmpeg } from "/assets/ffmpeg/package/dist/esm/index.js";
-import { toBlobURL } from "/assets/util/package/dist/esm/index.js";
+import { FFmpeg } from "./assets/ffmpeg/package/dist/esm/index.js";
+import { toBlobURL } from "./assets/util/package/dist/esm/index.js";
 
 class TrimNSizer {
     constructor() {
