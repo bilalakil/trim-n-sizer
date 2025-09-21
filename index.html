@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trim-n-Sizer - Video Trimming & Compression Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .drop-zone {
+            border: 3px dashed #444;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #252525;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4a9eff;
+            background: #2a3444;
+        }
+
+        .drop-zone.has-video {
+            padding: 0;
+            border: none;
+            background: transparent;
+            cursor: default;
+        }
+
+        .drop-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .drop-text {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .drop-subtext {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .video-container {
+            display: none;
+            width: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .video-info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .controls-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .control-group {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 500;
+        }
+
+        .format-selection {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .format-btn {
+            background: #333;
+            border: 2px solid #555;
+            border-radius: 8px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 12px 24px;
+            transition: all 0.3s;
+            min-width: 80px;
+        }
+
+        .format-btn:hover {
+            background: #404040;
+            border-color: #666;
+        }
+
+        .format-btn.active {
+            background: #4a9eff;
+            border-color: #4a9eff;
+            color: white;
+        }
+
+        .resolution-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .resolution-btn {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            transition: all 0.3s;
+        }
+
+        .resolution-btn:hover {
+            background: #404040;
+            border-color: #666;
+        }
+
+        .resolution-btn.active {
+            background: #4a9eff;
+            border-color: #4a9eff;
+            color: white;
+        }
+
+        .size-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .size-input {
+            background: #1a1a1a;
+            border: 2px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            padding: 12px 16px;
+            width: 120px;
+            transition: border-color 0.3s;
+        }
+
+        .size-input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .size-presets {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            transition: all 0.3s;
+        }
+
+        .preset-btn:hover {
+            background: #404040;
+            border-color: #666;
+        }
+
+        .timeline-container {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .timeline-label {
+            font-size: 1rem;
+            color: #ccc;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .timeline {
+            position: relative;
+            height: 60px;
+            background: #1a1a1a;
+            border-radius: 6px;
+            margin: 15px 0;
+            cursor: pointer;
+        }
+
+        .timeline-track {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            right: 10px;
+            height: 4px;
+            background: #444;
+            transform: translateY(-50%);
+            border-radius: 2px;
+        }
+
+        .timeline-selection {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, #4a9eff, #0066cc);
+            border-radius: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 10px;
+            right: 10px;
+        }
+
+        .timeline-handle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #4a9eff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: grab;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+            z-index: 10;
+        }
+
+        .timeline-handle:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .timeline-handle:active {
+            cursor: grabbing;
+        }
+
+        .timeline-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .render-section {
+            text-align: center;
+        }
+
+        .render-btn {
+            background: linear-gradient(135deg, #4a9eff, #0066cc);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 15px 40px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.3);
+        }
+
+        .render-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.4);
+        }
+
+        .render-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .render-btn:disabled {
+            background: #444;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .progress-container {
+            display: none;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9eff, #0066cc);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: #4a1a1a;
+            border: 1px solid #cc4444;
+            border-radius: 6px;
+            color: #ffaaaa;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .warning-message {
+            background: #4a3a1a;
+            border: 1px solid #ccaa44;
+            border-radius: 6px;
+            color: #ffffaa;
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Disabled control styles */
+        .format-btn:disabled,
+        .resolution-btn:disabled,
+        .preset-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .size-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .timeline.processing {
+            opacity: 0.5;
+        }
+
+        .timeline.processing .timeline-handle {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .drop-zone.processing {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .drop-zone {
+                padding: 40px 15px;
+            }
+
+            .size-input-group,
+            .resolution-controls,
+            .size-presets,
+            .format-selection {
+                justify-content: center;
+            }
+
+            .render-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .control-group {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Trim-n-Sizer</h1>
+        <p>Trim videos and compress them to your target file size - all processed locally in your browser</p>
+    </div>
+
+    <div class="main-container">
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-icon">🎬</div>
+            <div class="drop-text">Drop your video file here</div>
+            <div class="drop-subtext">Click to browse, or paste a video file</div>
+            <input type="file" id="fileInput" accept="video/*">
+        </div>
+
+        <div class="video-container" id="videoContainer">
+            <video id="videoPlayer" controls></video>
+            <div class="video-info" id="videoInfo"></div>
+        </div>
+
+        <div class="controls-section" id="controlsSection">
+            <div class="control-group">
+                <label class="control-label">Output Format:</label>
+                <div class="format-selection">
+                    <button class="format-btn active" id="mp4Format" data-format="mp4">MP4</button>
+                    <button class="format-btn" id="gifFormat" data-format="gif">GIF</button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label class="control-label">Resolution:</label>
+                <div class="resolution-controls">
+                    <span style="color: #888; margin-right: 10px;" id="originalResolution">Original: --</span>
+                    <button class="resolution-btn active" data-scale="1.0">100%</button>
+                    <button class="resolution-btn" data-scale="0.75">75%</button>
+                    <button class="resolution-btn" data-scale="0.5">50%</button>
+                </div>
+            </div>
+
+            <div class="control-group" id="mp4Controls">
+                <label class="control-label">Target File Size (MP4):</label>
+                <div class="size-input-group">
+                    <input type="number" class="size-input" id="sizeInput" value="10" min="1" max="1000" step="0.1">
+                    <span style="color: #ccc;">MB</span>
+                    <div class="size-presets">
+                        <button class="preset-btn" data-size="5">5 MB</button>
+                        <button class="preset-btn" data-size="10">10 MB</button>
+                        <button class="preset-btn" data-size="25">25 MB</button>
+                        <button class="preset-btn" data-size="50">50 MB</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-group hidden" id="gifControls">
+                <label class="control-label">Target Framerate (GIF):</label>
+                <div class="size-input-group">
+                    <input type="number" class="size-input" id="framerateInput" value="15" min="1" max="60" step="1">
+                    <span style="color: #ccc;">fps</span>
+                    <div class="size-presets">
+                        <button class="preset-btn" data-framerate="15">15 fps</button>
+                        <button class="preset-btn" data-framerate="10">10 fps</button>
+                        <button class="preset-btn" data-framerate="5">5 fps</button>
+                        <button class="preset-btn" data-framerate="3">3 fps</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-label">Trim Video:</div>
+                <div class="timeline" id="timeline">
+                    <div class="timeline-track"></div>
+                    <div class="timeline-selection" id="timelineSelection"></div>
+                    <div class="timeline-handle" id="startHandle"></div>
+                    <div class="timeline-handle" id="endHandle"></div>
+                </div>
+                <div class="timeline-times">
+                    <span id="startTime">00:00</span>
+                    <span>Duration: <span id="duration">00:00</span></span>
+                    <span id="endTime">00:00</span>
+                </div>
+            </div>
+
+            <div class="warning-message" id="webCodecsWarning">
+                <strong>Note:</strong> This browser doesn't support WebCodecs API. Falling back to FFmpeg.wasm for video processing (slower but compatible).
+            </div>
+
+            <div class="render-section">
+                <button class="render-btn" id="renderBtn" disabled>Process Video</button>
+            </div>
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

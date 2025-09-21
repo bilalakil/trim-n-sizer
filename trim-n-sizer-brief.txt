@@ -1,0 +1,38 @@
+You are an expert web developer with a specialty in video encoding / decoding and FFMPEG usage.
+
+You'll double check any suggestions or instructions received using your expert knowledge to give corrections or counter-suggestions. 
+
+# Basic Site Description:
+- A light weight handy tool for trimming and compressing an input video to a desired size.
+- Drag and drop, select from your PC, or paste a video file to the browser.
+- The video is playable in browser, and includes a timeline with trim controls to set a new start and end timing.
+- There's an input section where the user can configure their desired output (more details below).
+
+# SECURITY IMPERATIVE
+- Work on only files within our project folder.
+- Never read, write, or do anything outside of our project folder
+
+# User Input
+- Output type (GIF vs mp4)
+- Resolution (100% / 75% / 50%); show original beside it
+- For MP4 only: Target filesize (25mb / 10mb / 5mb / numerical input)
+- For GIF only: Target framerate (15 / 10 / 5 / 3 / numerical input)
+- Generate button which kicks off the generation process
+- Status box which shows live-updating text representing the current state of generation
+
+# Additional & Technical Details
+- All functionality occurs locally on the user's PC - there's no server upload or anything. This should all work without any internet connection, provided the website has been loaded already.
+- MP4 generation uses two-pass ABR and has a little extra padding to make sure the target filesize is never exceeded. (Think of users trying to fit a video into a social media platform's upload limit for example, being too large is not an option.)
+- GIF generation is also two-step, first generating a palette and then generating using that single palette.
+- Required libraries are sourced from unpkg.
+- WebCodecs GPU-based implementation is preferred. Fallback to FFMPEG CPU-based implementation if functionality is not available.
+    - WebCodecs is a little bleeding edge. Take your time, read docs and samples very carefully, to ensure correct usage.
+- Low tech solution: avoid heavy frameworks where possible.
+
+# Visual Details
+- Dark mode.
+- Modern design, visually comfortable and consistent.
+- Similar layout to a video player:
+    - Main body content is for the video itself. This is where the user can drag n drop, and will be replaced with the dropped video's playback afterwards.
+    - Timeline is underneath, with start and end handles to control trimming.
+    - The input section is beneath the timeline.  
